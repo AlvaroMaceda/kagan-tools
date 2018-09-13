@@ -1,0 +1,13 @@
+body {
+    padding: 0;
+}
+canvas {
+    /*position: absolute;*/
+    border: 1px solid black;
+    /*width: 95vw;*/
+    /*height: 95vh;*/
+    /*width: 100px;*/
+    /*height: 100px;*/
+    padding: 0;
+    margin:0;
+}

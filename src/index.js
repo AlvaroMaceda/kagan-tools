@@ -47,33 +47,39 @@ function pie(ctx,{x = 0, y= 0, radius, start = 0, end = 2* Math.PI, lineColor, l
     if(fillColor!==undefined) ctx.fillStyle = fillColor;
     ctx.lineWidth = linewidth;
 
+    ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.arc(x,y,radius,angle(start),angle(end));
     ctx.lineTo(x, y);
+
     ctx.fill();
     ctx.stroke();
 
     ctx.restore();
 }
+const FULL_CIRCLE = 2*Math.PI;
 
-function patata(ctx) {
-    ctx.save();
+class DrawingProperties {
+    constructor({lineColor, lineWidth, fillColor}) {
 
-    // console.log(angle(0));
-
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.arc(0,0,50,angle(0),angle(Math.PI));
-    ctx.moveTo(0, 0);
-    ctx.strokeStyle = 'black';
-    ctx.fillStyle = 'red';
-    // ctx.stroke();
-    ctx.fill();
-
-    ctx.restore();
+    }
 }
-// patata(spinnerCanvas);
-pie(spinnerCanvas,{x:0,y:0,start:0,end:Math.PI,radius:50,fillColor:'red',lineColor:'black'});
+
+function dividedCircle(ctx, {x = 0, y = 0, radius, numParts = 2}) {
+
+    for(let i=0; i<numParts; i++) {
+        pie(ctx,{})
+    }
+
+}
+// dividedCircle(spinnerCanvas);
+
+pie(spinnerCanvas,{x:0,y:0,start:0,end:FULL_CIRCLE/3,radius:60,fillColor:'white',lineColor:'black',linewidth:2});
+pie(spinnerCanvas,{x:0,y:0,start:FULL_CIRCLE/3,end:2*FULL_CIRCLE/3,radius:60,fillColor:'white',lineColor:'black',linewidth:2});
+pie(spinnerCanvas,{x:0,y:0,start:2*FULL_CIRCLE/3,end:FULL_CIRCLE,radius:60,fillColor:'white',lineColor:'black',linewidth:2});
+
+pie(spinnerCanvas,{x:0,y:0,start:0,end:FULL_CIRCLE/2,radius:40,fillColor:'red',lineColor:'black'});
+pie(spinnerCanvas,{x:0,y:0,start:FULL_CIRCLE/2,end:FULL_CIRCLE,radius:40,fillColor:'red',lineColor:'black'});
 
 
 //709

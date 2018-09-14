@@ -6,12 +6,31 @@ import styles from './styles.css';
 import {fromEvent} from "rxjs";
 
 
+const FULL_CIRCLE = 2*Math.PI;
+
+class DrawStyle {
+    constructor({lineColor, lineWidth, fillColor}) {
+        this.lineColor = lineColor;
+        this.lineWidth = lineWidth;
+        this.fillColor = fillColor;
+    }
+}
+
 const startButton = document.querySelector('#start');
 let start$ = fromEvent(startButton,'click');
 
-
 let spinnerCanvasElement = document.getElementById("spinner-canvas");
 let spinnerCanvas = spinnerCanvasElement.getContext("2d");
+
+
+// function resizeCanvas() {
+//     inMemCanvas.width = canvasRef.width;
+//     inMemCanvas.height = canvasRef.height;
+//     inMemCtx.drawImage(canvasRef, 0, 0);
+//     canvasRef.width = 1000;
+//     ctx.drawImage(inMemCanvas, 0, 0);
+// }
+
 
 function adjustCanvasToContainer(canvasElement, ctx) {
     let container = canvasElement.parentElement;
@@ -26,6 +45,7 @@ function adjustCanvasToContainer(canvasElement, ctx) {
     ctx.width = width;
     ctx.height = height;
 }
+
 function setOriginInCanvasCenter(ctx) {
     ctx.translate(ctx.width/2,ctx.height/2); // now 0,0 is the center of the canvas.
 }
@@ -34,22 +54,24 @@ adjustCanvasToContainer(spinnerCanvasElement,spinnerCanvas);
 setOriginInCanvasCenter(spinnerCanvas);
 
 
-function angle(angle) {
-    return angle - ((1/2) * Math.PI);;
+function translateAngleToOriginOnTop(angle) {
+    return angle - ((1/2) * Math.PI);
 }
 
-function pie(ctx,{x = 0, y= 0, radius, start = 0, end = 2* Math.PI, lineColor, linewidth= 1, fillColor}) {
-    console.log(`x:${x} radius=${radius} stroke=${lineColor}`);
+
+function setDrawStyle(ctx, drawStyle) {
+    if(drawStyle.lineColor !== undefined) ctx.strokeStyle = drawStyle.lineColor;
+    if(drawStyle.fillColor !== undefined) ctx.fillStyle = drawStyle.fillColor;
+    if(drawStyle.lineWidth !== undefined) ctx.lineWidth = drawStyle.lineWidth;
+}
+
+function pie(ctx,{x = 0, y= 0, radius, start = 0, end = 2* Math.PI}) {
 
     ctx.save();
 
-    if(lineColor!==undefined) ctx.strokeStyle = lineColor;
-    if(fillColor!==undefined) ctx.fillStyle = fillColor;
-    ctx.lineWidth = linewidth;
-
     ctx.beginPath();
     ctx.moveTo(x, y);
-    ctx.arc(x,y,radius,angle(start),angle(end));
+    ctx.arc(x,y,radius,translateAngleToOriginOnTop(start),translateAngleToOriginOnTop(end));
     ctx.lineTo(x, y);
 
     ctx.fill();
@@ -57,29 +79,39 @@ function pie(ctx,{x = 0, y= 0, radius, start = 0, end = 2* Math.PI, lineColor, l
 
     ctx.restore();
 }
-const FULL_CIRCLE = 2*Math.PI;
 
-class DrawingProperties {
-    constructor({lineColor, lineWidth, fillColor}) {
-
-    }
-}
 
 function dividedCircle(ctx, {x = 0, y = 0, radius, numParts = 2}) {
 
+    let startAngle = 0;
+    let increment = FULL_CIRCLE / numParts;
+    let endAngle;
+
     for(let i=0; i<numParts; i++) {
-        pie(ctx,{})
+        endAngle = startAngle + increment;
+        pie(ctx,{x,y,radius,start: startAngle, end: endAngle});
+        startAngle = endAngle;
     }
 
 }
-// dividedCircle(spinnerCanvas);
 
-pie(spinnerCanvas,{x:0,y:0,start:0,end:FULL_CIRCLE/3,radius:60,fillColor:'white',lineColor:'black',linewidth:2});
-pie(spinnerCanvas,{x:0,y:0,start:FULL_CIRCLE/3,end:2*FULL_CIRCLE/3,radius:60,fillColor:'white',lineColor:'black',linewidth:2});
-pie(spinnerCanvas,{x:0,y:0,start:2*FULL_CIRCLE/3,end:FULL_CIRCLE,radius:60,fillColor:'white',lineColor:'black',linewidth:2});
+let styleOdd = new DrawStyle({fillColor:'red',lineColor:'black',lineWidth:2});
+let styleEven = new DrawStyle({fillColor:'white',lineColor:'black',lineWidth:2});
 
-pie(spinnerCanvas,{x:0,y:0,start:0,end:FULL_CIRCLE/2,radius:40,fillColor:'red',lineColor:'black'});
-pie(spinnerCanvas,{x:0,y:0,start:FULL_CIRCLE/2,end:FULL_CIRCLE,radius:40,fillColor:'red',lineColor:'black'});
+setDrawStyle(spinnerCanvas,styleEven);
+dividedCircle(spinnerCanvas,{x:0, y:0, radius:130, numParts:5});
+
+setDrawStyle(spinnerCanvas,styleOdd);
+dividedCircle(spinnerCanvas,{x:0, y:0, radius:100, numParts:4});
+
+setDrawStyle(spinnerCanvas,styleEven);
+dividedCircle(spinnerCanvas,{x:0, y:0, radius:70, numParts:3});
+
+setDrawStyle(spinnerCanvas,styleOdd);
+dividedCircle(spinnerCanvas,{x:0, y:0, radius:40, numParts:2});
+
+
+
 
 
 //709
@@ -103,15 +135,13 @@ start$.subscribe((event)=> {
     foo(spinnerCanvas);
 });
 
-/*
 window.addEventListener('resize',function(){
     console.log('hola');
-    var width  = calculateDesiredWidth();  // your code here
-    var height = calculateDesiredHeight(); // your code here
-    front.canvas.width  = width;
-    front.canvas.height = height;
-    front.translate(width/2,height/2); // now 0,0 is the center of the canvas.
+
+    let cvSave = spinnerCanvas.getImageData(0,0,spinnerCanvasElement.width, spinnerCanvasElement.height);
+    console.log(cvSave);
+    adjustCanvasToContainer(spinnerCanvasElement,spinnerCanvas);
+    spinnerCanvas.drawImage(cvSave,0,0);
 },false);
-*/
 
 

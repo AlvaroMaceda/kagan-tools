@@ -14,6 +14,22 @@ export class Point {
     }
 }
 
+export class PolarPoint {
+    constructor(R, theta) {
+        this.R = R;
+        this.theta = theta;
+    }
+    clone() {
+        return new PolarPoint(this.R,this.theta);
+    }
+    toCartesian() {
+        return new Point(
+            this.R * Math.cos(this.theta),
+            this.R * Math.sin(this.theta)
+            );
+    }
+}
+
 export class Vector extends Point {
     times(num) {
         return new Vector(this.x * num, this.y*num);

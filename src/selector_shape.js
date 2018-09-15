@@ -1,6 +1,8 @@
+import { PolarPoint } from './geometry';
+
 const FULL_CIRCLE = 2*Math.PI;
 
-class SelectorShape {
+export class SelectorShape {
 
     constructor() {
     }
@@ -74,6 +76,3 @@ function pie(ctx,{center, radius, start = 0, end = 2* Math.PI}) {
 function translateAngleToOriginOnTop(angle) {
     return angle - ((1/2) * Math.PI);
 }
-
-
-module.exports = SelectorShape;

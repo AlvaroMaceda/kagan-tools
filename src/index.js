@@ -5,7 +5,7 @@ import styles from './styles.css';
 // import Escala from "./Escala";
 import { fromEvent } from "rxjs";
 import { Point } from './geometry';
-
+import { SelectorShape } from './selector_shape';
 
 const startButton = document.querySelector('#start');
 let start$ = fromEvent(startButton,'click');
@@ -45,34 +45,13 @@ adjustCanvasToContainer(spinnerCanvasElement,spinnerCanvas);
 setOriginInCanvasCenter(spinnerCanvas);
 
 
-const SelectorShape = require('./selector_shape');
+
 let selectorShape = new SelectorShape();
-selectorShape.draw(spinnerCanvas, new Point(0,0));
 
-
-
-
-
-
-
-
-
-
-//709
-//156 ?
-function foo(ctx) {
-    // ctx.translate(0,75);
-    ctx.save();
-    ctx.fillStyle = '#FF0000';
-    let square = [
-        0,
-        0,
-        30,
-        60
-    ];
-    ctx.fillRect.apply(ctx,square);
-    ctx.restore();
+function draw() {
+    selectorShape.draw(spinnerCanvas, new Point(0,0));
 }
+draw();
 
 start$.subscribe((event)=> {
     console.log('start');
@@ -80,12 +59,9 @@ start$.subscribe((event)=> {
 });
 
 window.addEventListener('resize',function(){
-    console.log('hola');
-
-    let cvSave = spinnerCanvas.getImageData(0,0,spinnerCanvasElement.width, spinnerCanvasElement.height);
-    console.log(cvSave);
     adjustCanvasToContainer(spinnerCanvasElement,spinnerCanvas);
-    spinnerCanvas.putImageData(cvSave,0,0);
+    setOriginInCanvasCenter(spinnerCanvas);
+    draw();
 },false);
 
 

@@ -1,4 +1,5 @@
 import { PolarPoint } from './geometry';
+import { partial } from "./functional";
 
 const FULL_CIRCLE = 2*Math.PI;
 
@@ -20,13 +21,20 @@ export class SelectorShape {
 
     draw(ctx, center, radius) {
 
-
         ctx.fillStyle = 'black';
 
-        ring(ctx, styleEven, {center, innerRadius:90, outerRadius:120, numParts:5});
-        ring(ctx, styleOdd, {center, innerRadius:60, outerRadius:90, numParts:4});
-        ring(ctx, styleEven, {center, innerRadius:30, outerRadius:60, numParts:3});
-        ring(ctx, styleOdd, {center, innerRadius:0, outerRadius:30, numParts:2});
+        radius = 120;
+        const NUM_RINGS = 4;
+        let ringsRadius = partsOfInterval(0,radius,NUM_RINGS).reverse();
+        console.log(ringsRadius);
+
+        let numRing = NUM_RINGS; // TODO: get rid of loop variables
+        let style = styleEven;
+        ringsRadius.forEach( (ringRadius) => {
+            ring(ctx, style, {center, innerRadius:ringRadius.start, outerRadius:ringRadius.end, numParts:numRing+1});
+            numRing--;
+            style = (style === styleEven ) ? styleOdd : styleEven;
+        });
     }
 
 }
@@ -46,7 +54,7 @@ function setDrawStyle(ctx, drawStyle) {
 
 function dividedCircle(ctx, {center, radius, numParts = 2}) {
 
-    let parts = circleParts(numParts);
+    let parts = partsOfInterval(0, FULL_CIRCLE, numParts);
 
     parts.forEach(({start, end}) => {
         pie(ctx, {center, radius, start, end});
@@ -58,42 +66,17 @@ function dividedCircleLabels(ctx, {center, radius, numParts = 2}) {
 
     ctx.textAlign = 'center';
 
-    let start = FULL_CIRCLE / (2 * numParts);
-    let parts = circleParts(numParts, start);
-    let i = 1;
+    let displacement = FULL_CIRCLE / (2 * numParts);
+    let displaceToCenterOfInterval = partial(displace,displacement);
 
+    let parts = partsOfInterval(0, 2*Math.PI, numParts).map(displaceToCenterOfInterval);
+
+    let i = 1; // TODO: get rid of this "i"
     parts.forEach(({start}) => {
         let position = new PolarPoint(radius,translateAngleToOriginOnTop(start)).toCartesian();
         ctx.fillText(i++,position.x,position.y);
     });
 
-}
-
-function partsOfInterval(){
-    // This should be a generalization of circleParts
-}
-function displace() {
-    // To use as:
-
-    // displaceX = (interval) => displace(interval, X)
-    // parts = partsOfInterval(0,2*Math.PI,parts).foreach(displaceX)
-}
-
-
-function circleParts(numParts, start = 0) {
-
-    let startAngle = start;
-    let increment = FULL_CIRCLE / numParts;
-    let endAngle;
-    let result = [];
-
-    for(let i=0; i<numParts; i++) {
-        endAngle = startAngle + increment;
-        result.push({start:startAngle, end: endAngle});
-        startAngle = endAngle;
-    }
-
-    return result;
 }
 
 function pie(ctx,{center, radius, start = 0, end = 2* Math.PI}) {
@@ -111,7 +94,29 @@ function pie(ctx,{center, radius, start = 0, end = 2* Math.PI}) {
     ctx.restore();
 }
 
-
 function translateAngleToOriginOnTop(angle) {
     return angle - ((1/2) * Math.PI);
+}
+
+
+function partsOfInterval(start, end, numParts){
+    let intervalStart = start;
+    let increment = end / numParts;
+    let intervalEnd;
+    let result = [];
+
+    for(let i=0; i<numParts; i++) {
+        intervalEnd = intervalStart + increment;
+        result.push({start:intervalStart, end: intervalEnd});
+        intervalStart = intervalEnd;
+    }
+
+    return result;
+}
+
+function displace(ammount,interval) {
+    return {
+        start: interval.start + ammount,
+        end: interval.end + ammount
+    }
 }

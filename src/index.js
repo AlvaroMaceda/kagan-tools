@@ -1,61 +1,39 @@
 import styles from './styles.css';
-// import Movil from './Movil'
-// import {Point, Vector} from "./geometry";
-// import {cmToPixels, secondsToMiliseconds} from "./conversions";
-// import Escala from "./Escala";
 
-// import { fromEvent } from "rxjs";
 import { Point } from './geometry';
 import { SelectorShape } from './selector_shape';
 
-import { Subject, fromEvent, interval, timer } from 'rxjs';
-import { take, scan, share, switchMapTo, debounceTime, distinct } from 'rxjs/operators';
-import { animationFrameScheduler } from 'rxjs';
+import { AnimationFrames} from "./animation_frames";
+import { fromEvent } from 'rxjs';
+import { switchMapTo } from 'rxjs/operators';
 
-let pauser = new Subject();
+let animation = new AnimationFrames();
 
 const startButton = document.querySelector('#start');
 const stopButton = document.querySelector('#stop');
 let start$ = fromEvent(startButton,'click');
 let stop$ = fromEvent(stopButton,'click');
 
-function frameDataCalculator(startTime) {
-    console.log(`creating frame calculator. Start time:${startTime}`);
-    return function (previousFrameData) {
-        // console.log(previousFrameData);
-        const timeSinceAnimationStarted = animationFrameScheduler.now()-startTime;
-        return {
-            fromStart: timeSinceAnimationStarted,
-            fromLastFrame:timeSinceAnimationStarted-previousFrameData.fromStart
-        }
-    }
-}
 
-const initialFrameData = {fromStart:0,fromLastFrame:0};
+start$.subscribe(()=>{
+    console.log('**START**');
+});
 
-function createFrameStream() {
-    return interval(0,animationFrameScheduler).pipe(
-        scan(frameDataCalculator(animationFrameScheduler.now()),initialFrameData),
-        distinct(),
-        take(10),
-        share()
-    );
-}
+stop$.subscribe(() => {
+    console.log('**STOP**');
+    animation.stop();
+});
 
 let frames$ = start$.pipe(
-    switchMapTo(createFrameStream())
+    switchMapTo(animation.createFramesStream())
 );
 
 frames$.subscribe((x) => {
+    console.log("index:"+x.index);
     console.log("from start:"+x.fromStart);
-    console.log("from last frame:"+x.fromLastFrame)
+    console.log("from last frame:"+x.fromLastFrame);
     draw();
 });
-
-// createFrameStream().subscribe((x) => {
-//     console.log("from start:"+x.fromStart);
-//     console.log("from last frame:"+x.fromLastFrame)
-// });
 
 
 let spinnerCanvasElement = document.getElementById("spinner-canvas");
@@ -91,10 +69,6 @@ function resizeCanvasToContainer(){
 }
 resizeCanvasToContainer();
 
-
-// start$.subscribe((event)=> {
-//     console.log('start');
-// });
 
 window.addEventListener('resize',function(){
     resizeCanvasToContainer();

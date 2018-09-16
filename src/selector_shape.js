@@ -26,7 +26,6 @@ export class SelectorShape {
         radius = 120;
         const NUM_RINGS = 4;
         let ringsRadius = partsOfInterval(0,radius,NUM_RINGS).reverse();
-        console.log(ringsRadius);
 
         let numRing = NUM_RINGS; // TODO: get rid of loop variables
         let style = styleEven;
@@ -71,10 +70,9 @@ function dividedCircleLabels(ctx, {center, radius, numParts = 2}) {
 
     let parts = partsOfInterval(0, 2*Math.PI, numParts).map(displaceToCenterOfInterval);
 
-    let i = 1; // TODO: get rid of this "i"
-    parts.forEach(({start}) => {
+    parts.forEach(({start},index) => {
         let position = new PolarPoint(radius,translateAngleToOriginOnTop(start)).toCartesian();
-        ctx.fillText(i++,position.x,position.y);
+        ctx.fillText((index+1).toString(),position.x,position.y);
     });
 
 }

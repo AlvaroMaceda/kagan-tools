@@ -2,8 +2,13 @@ body {
     padding: 0;
 }
 
-#spinner-container {
+#spinner-container, #needle-container {
+    position: absolute;
+}
+
+#spinner-container, #needle-container {
     height: 500px;
+    width: 90%;
 }
 
 canvas {

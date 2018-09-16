@@ -11,8 +11,10 @@ let animation = new AnimationFrames();
 
 const startButton = document.querySelector('#start');
 const stopButton = document.querySelector('#stop');
+
 let start$ = fromEvent(startButton,'click');
 let stop$ = fromEvent(stopButton,'click');
+let resize$ = fromEvent(window,'resize');
 
 
 start$.subscribe(()=>{
@@ -38,6 +40,9 @@ frames$.subscribe((x) => {
 
 let spinnerCanvasElement = document.getElementById("spinner-canvas");
 let spinnerCanvas = spinnerCanvasElement.getContext("2d");
+
+let needleCanvasElement = document.getElementById("needle-canvas");
+let needleCanvas = needleCanvasElement.getContext("2d");
 
 function adjustCanvasSizeToParent(canvasElement, ctx) {
     let container = canvasElement.parentElement;
@@ -69,10 +74,9 @@ function resizeCanvasToContainer(){
 }
 resizeCanvasToContainer();
 
-
-window.addEventListener('resize',function(){
+resize$.subscribe(() => {
     resizeCanvasToContainer();
-},false);
+});
 
 
 
